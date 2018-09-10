@@ -13,6 +13,7 @@
         <module>jparser-runtime</module>
         <module>jparser-source</module>
         <module>jparser-output</module>
+        <module>jparser-api</module>
     </modules>
 
     <parent>
