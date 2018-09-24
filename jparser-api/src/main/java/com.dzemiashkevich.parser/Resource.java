@@ -27,6 +27,10 @@ public class Resource {
         this.params = params;
     }
 
+    public boolean isEmpty() {
+        return params == null || params.size() == 0;
+    }
+
     @Override
     public boolean equals(Object object) {
         return EqualsBuilder.reflectionEquals(this, object);

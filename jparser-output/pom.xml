@@ -2,14 +2,43 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jparser-output</artifactId>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <parent>
         <artifactId>JParser</artifactId>
         <groupId>com.dzemiashkevich.parser</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>jparser-output</artifactId>
+    <properties>
+        <org.apache.commons.version>1.5</org.apache.commons.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.dzemiashkevich.parser</groupId>
+            <artifactId>jparser-source</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>${org.apache.commons.version}</version>
+        </dependency>
+    </dependencies>
 
 
 </project>
