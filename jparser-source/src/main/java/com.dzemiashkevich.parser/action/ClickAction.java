@@ -1,15 +1,11 @@
 package com.dzemiashkevich.parser.action;
 
-import com.dzemiashkevich.parser.api.Select;
-import com.dzemiashkevich.parser.helper.DocumentLoader;
-import com.dzemiashkevich.parser.Resource;
+import com.dzemiashkevich.parser.api.Selector;
 import com.dzemiashkevich.parser.api.Rule;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -17,41 +13,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
-public class JumpAction implements Action {
+public class ClickAction extends JumpAction {
 
     private static final String URL_SEPARATOR = "/";
 
-    private final DocumentLoader loader;
-
-    @Autowired
-    public JumpAction(DocumentLoader loader) {
-        this.loader = loader;
-    }
-
     @Override
-    public List<Resource> doAction(Deque<Rule> rules) {
-        if (CollectionUtils.isEmpty(rules)) {
-            return Collections.emptyList();
-        }
-
-        Rule rule = rules.removeFirst();
-
-        List<String> source = rule.getSource();
-        for (String res : source) {
-            Document document = loader.load(res);
-
-            if (document == null) {
-                continue;
-            }
-
-            List<String> href = this.parseContextBySelect(document, rule.getPattern());
-            this.prepareRuleToProcessing(rule, rules.getFirst(), href);
-        }
-
-        return rules.getFirst().getAction().doAction(rules);
-    }
-
-    private void prepareRuleToProcessing(Rule prev, Rule next, List<String> href) {
+    protected void prepareRuleToProcessing(Rule prev, Rule next, List<String> href) {
         List<String> _next = next.getSource();
         List<String> _prev = prev.getSource();
 
@@ -65,11 +32,12 @@ public class JumpAction implements Action {
         return source.stream().distinct().collect(Collectors.toList());
     }
 
-    private List<String> parseContextBySelect(Document document, Map<Select, String> select) {
+    @Override
+    protected List<String> parseContextBySelect(Document document, Map<Selector, String> select) {
         List<String> href = new ArrayList<String>();
 
-        Elements elements = document.select(select.get(Select.OUTER));
-        for (Element element : elements) {
+        Elements context = document.select(select.get(Selector.OUTER));
+        for (Element element : context) {
             String _href = parseHref(element, select);
 
             if (StringUtils.isEmpty(_href)) {
@@ -82,12 +50,12 @@ public class JumpAction implements Action {
         return href;
     }
 
-    private String parseHref(Element element, Map<Select, String> select) {
-        String _inner = select.get(Select.INNER);
+    private String parseHref(Element element, Map<Selector, String> select) {
+        String _inner = select.get(Selector.INNER);
         if (!StringUtils.isEmpty(_inner)) {
             element = element.select(_inner).first();
         }
-        return element.attr(select.get(Select.HREF));
+        return element.attr(select.get(Selector.HREF));
     }
 
     private String common(String href1, String href2) {

@@ -1,4 +1,4 @@
-package com.dzemiashkevich.parser.helper;
+package com.dzemiashkevich.parser;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class DocumentLoader {
+class DocumentLoader {
 
-    public Document load(final String url) {
+    Document load(final String url) {
         try {
             return Jsoup.connect(url).get();
         } catch (IOException e) {

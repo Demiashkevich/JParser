@@ -1,6 +1,6 @@
 package com.dzemiashkevich.parser.api;
 
-public enum Select {
+public enum Selector {
 
     INNER, OUTER, HREF
 

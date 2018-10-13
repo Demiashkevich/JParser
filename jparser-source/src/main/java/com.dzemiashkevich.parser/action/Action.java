@@ -5,9 +5,10 @@ import com.dzemiashkevich.parser.api.Rule;
 
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 
 public interface Action {
 
-    List<Resource> doAction(Deque<Rule> rules);
+    Map<String, List<Resource>> doAction(Deque<Rule> rules);
 
 }

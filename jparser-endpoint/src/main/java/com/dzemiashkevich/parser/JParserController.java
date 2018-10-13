@@ -1,9 +1,8 @@
 package com.dzemiashkevich.parser;
 
-import com.dzemiashkevich.parser.action.JumpAction;
-import com.dzemiashkevich.parser.action.TakeAction;
 import com.dzemiashkevich.parser.api.Rule;
-import com.dzemiashkevich.parser.api.Select;
+import com.dzemiashkevich.parser.api.Selector;
+import com.dzemiashkevich.parser.api.StandardRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,26 +10,22 @@ import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Component
-public class RuleBuilder {
+public class JParserController {
 
-    private final JumpAction jump;
-
-    private final TakeAction take;
+    private final ResourceManager manager;
 
     @Autowired
-    public RuleBuilder(JumpAction jump, TakeAction take) {
-        this.jump = jump;
-        this.take = take;
+    public JParserController(ResourceManager manager) {
+        this.manager = manager;
     }
 
     @PostConstruct
-    public void build() {
-        ArrayDeque<Rule> rules = new ArrayDeque<Rule>();
+    public void init() {
+        List<StandardRule> rules = new ArrayList<>();
 
-        HashMap<Select, String> pattern = new HashMap<Select, String>();
-        pattern.put(Select.OUTER, "#content table tbody tr td a");
-//        pattern.put(Select.INNER, "tr td a");
-        pattern.put(Select.HREF, "href");
+        HashMap<Selector, String> pattern = new HashMap<>();
+        pattern.put(Selector.OUTER, "#content table tbody tr td a");
+        pattern.put(Selector.HREF, "href");
 
         Rule rule1 = new Rule();
         rule1.setAction(jump);
@@ -47,28 +42,26 @@ public class RuleBuilder {
         rule3.setPattern(pattern);
         rule3.setSource(new ArrayList<>(Collections.singletonList("http://www.dealmed.ru/uzi_skanery.html")));
 
-        HashMap<Select, String> patternTake = new HashMap<Select, String>();
-        patternTake.put(Select.OUTER, "#content");
-//        pattern.put(Select.INNER, "tr td a");
-//        patternTake.put(Select.HREF, "href");
+        HashMap<Selector, String> patternTake = new HashMap<>();
+        patternTake.put(Selector.OUTER, "#content");
 
-        Map<String, String> param = new HashMap<String, String>();
+        Map<String, String> param = new HashMap<>();
         param.put("name", "div h1.page-header");
-        param.put("description", "div p");
-        param.put("price", "div div div span span");
+        param.put("description", "div > p");
+        param.put("price", "div div div span.price span.price-value");
 
         Rule rule4 = new Rule();
         rule4.setAction(take);
         rule4.setPattern(patternTake);
         rule4.setParam(param);
-        rule4.setSource(new ArrayList<>(Collections.singletonList("http://www.dealmed.ru/uzi_skaner_i6.html")));
+        rule4.setSource(new ArrayList<>(Collections.singletonList("http://www.dealmed.ru/uzi_skaner_sonotouch10.html")));
 
         rules.addLast(rule1);
         rules.addLast(rule2);
         rules.addLast(rule3);
         rules.addLast(rule4);
 
-        jump.doAction(rules);
+        manager.process(rules);
     }
 
 }

@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>jparser-builder</artifactId>
+    <artifactId>jparser-endpoint</artifactId>
 
     <parent>
         <artifactId>JParser</artifactId>
@@ -15,16 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>com.dzemiashkevich.parser</groupId>
-            <artifactId>jparser-source</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.dzemiashkevich.parser</groupId>
-            <artifactId>jparser-common</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
+            <artifactId>jparser-manager</artifactId>
         </dependency>
     </dependencies>
 

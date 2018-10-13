@@ -1,11 +1,20 @@
 package com.dzemiashkevich.parser;
 
-import com.dzemiashkevich.parser.action.JumpAction;
+import com.dzemiashkevich.parser.action.ClickAction;
+import com.dzemiashkevich.parser.action.PaginationAction;
 import com.dzemiashkevich.parser.action.TakeAction;
+import com.dzemiashkevich.parser.builder.RuleBuilder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackageClasses = { RuleBuilder.class, JumpAction.class, TakeAction.class})
+@SpringBootApplication(scanBasePackageClasses = {
+        RuleBuilder.class,
+        ClickAction.class,
+        TakeAction.class,
+        PaginationAction.class,
+        DStore.class,
+        RStore.class
+})
 public class JParserApplication {
 
     public static void main(String[] args) {
