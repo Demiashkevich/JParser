@@ -12,10 +12,9 @@ public final class StringUtils {
     }
 
     public static String template(Pair<String, String> pair1, Pair<String, String> pair2) {
-        return difference(pair1.getLeft(), pair2.getLeft());
-    }
+        String str1 = pair1.getLeft();
+        String str2 = pair2.getLeft();
 
-    public static String difference(String str1, String str2) {
         if (str1.length() > str2.length()) {
             String temp = str1;
             str2 = str1;
@@ -32,11 +31,32 @@ public final class StringUtils {
             int indexOfEnd = matcher.end();
 
             if (indexOfStart <= indexOfDifference && indexOfEnd >= indexOfDifference) {
-                return str2.substring(0, indexOfStart + 1) + "%s" + str2.substring(indexOfEnd);
+                MatcherUtils.save(matcher.groupCount());
+                return str2.substring(0, indexOfStart) + "%s" + str2.substring(indexOfEnd);
             }
         }
 
         throw new RuntimeException(String.format("Unable to generate template by urls: %s, %s", str1, str2));
+    }
+
+    public static String template(Pair<String, String> pair1) {
+        String str1 = pair1.getLeft();
+
+        Integer groupId = MatcherUtils.fetch();
+
+        Pattern pattern = Pattern.compile("[0-9]+");
+        Matcher matcher = pattern.matcher(pair1.getLeft());
+
+        String group = matcher.group(groupId);
+
+        if (org.apache.commons.lang3.StringUtils.equals(group, pair1.getRight())) {
+            int indexOfStart = matcher.start(groupId);
+            int indexOfEnd = matcher.end(groupId);
+
+            return str1.substring(0, indexOfStart) + "%s" + str1.substring(indexOfEnd);
+        }
+
+        throw new RuntimeException(String.format("Unable to generate template by url: %s", str1));
     }
 
 }

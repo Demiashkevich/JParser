@@ -9,10 +9,19 @@ import java.util.Map;
 
 public class StandardRule {
 
+    private String name;
     private String actionType;
     private String source;
     private Map<Selector, String> pattern = new HashMap<>();
     private Map<String, Pair<String, String>> param = new HashMap<>();
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getActionType() {
         return actionType;

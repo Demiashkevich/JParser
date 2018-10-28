@@ -16,33 +16,36 @@ import java.util.Map;
 @Component
 public class CsvOutput extends AbstractOutput {
 
-    private static final String RESOURCE_PATH = "resource.csv";
+    private static final String FILE_EXTENSION = ".csv";
 
     private String[] header;
 
     @Override
-    public void write(List<Resource> resources) {
+    public void write(Map<String, List<Resource>> resources) {
         if (CollectionUtils.isEmpty(resources)) {
             return;
         }
 
-        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(RESOURCE_PATH))) {
-            header = buildHeader(resources.get(0));
-            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(header));
+        for (Map.Entry<String, List<Resource>> res : resources.entrySet()) {
+            try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(res.getKey() + FILE_EXTENSION))) {
+                header = buildHeader(res.getValue().get(0));
+                CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(header));
 
-            for (Resource resource : resources) {
-                Object[] values = buildParamAsArray(resource);
+                for (Resource resource : res.getValue()) {
+                    Object[] values = buildParamAsArray(resource);
 
-                if (ArrayUtils.isEmpty(values)) {
-                    continue;
+                    if (ArrayUtils.isEmpty(values)) {
+                        continue;
+                    }
+
+                    printer.printRecord(values);
                 }
 
-                printer.printRecord(values);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to write to the file by path: " + res.getKey());
             }
-
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to write to the file by path: " + RESOURCE_PATH);
         }
+
     }
 
     private Object[] buildParamAsArray(Resource resource) {

@@ -1,7 +1,8 @@
 package com.dzemiashkevich.parser;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractOutput implements Output {
-    public abstract void write(List<Resource> resources);
+    public abstract void write(Map<String, List<Resource>> resources);
 }

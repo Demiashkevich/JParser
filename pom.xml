@@ -79,6 +79,11 @@
                 <artifactId>jparser-utils</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.dzemiashkevich.parser</groupId>
+                <artifactId>jparser-endpoint</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>javax.annotation</groupId>

@@ -3,6 +3,7 @@ package com.dzemiashkevich.parser;
 import com.dzemiashkevich.parser.api.Rule;
 import com.dzemiashkevich.parser.api.Selector;
 import com.dzemiashkevich.parser.api.StandardRule;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,43 +24,51 @@ public class JParserController {
     public void init() {
         List<StandardRule> rules = new ArrayList<>();
 
-        HashMap<Selector, String> pattern = new HashMap<>();
-        pattern.put(Selector.OUTER, "#content table tbody tr td a");
-        pattern.put(Selector.HREF, "href");
+        HashMap<Selector, String> pattern1 = new HashMap<>();
+        pattern1.put(Selector.OUTER, "#le_menu_ul > ul > li > a");
+        pattern1.put(Selector.HREF, "href");
 
-        Rule rule1 = new Rule();
-        rule1.setAction(jump);
-        rule1.setPattern(pattern);
-        rule1.setSource(new ArrayList<>(Collections.singletonList("http://www.dealmed.ru")));
+        StandardRule standardRule1 = new StandardRule();
+        standardRule1.setSource("http://www.medknigaservis.ru");
+        standardRule1.setActionType("click");
+        standardRule1.setPattern(pattern1);
 
-        Rule rule2 = new Rule();
-        rule2.setAction(jump);
-        rule2.setPattern(pattern);
-        rule2.setSource(new ArrayList<>(Collections.singletonList("http://www.dealmed.ru/narkozno_dyxatelnye_apparaty_mindray.html")));
+        HashMap<Selector, String> pattern2 = new HashMap<>();
+        pattern2.put(Selector.OUTER, "#content > div > div > div:nth-child(2) > div > div:nth-child(2) > a");
+        pattern2.put(Selector.HREF, "href");
 
-        Rule rule3 = new Rule();
-        rule3.setAction(jump);
-        rule3.setPattern(pattern);
-        rule3.setSource(new ArrayList<>(Collections.singletonList("http://www.dealmed.ru/uzi_skanery.html")));
+        StandardRule standardRule2 = new StandardRule();
+        standardRule2.setSource("http://www.medknigaservis.ru/catalogue/med_spec.html");
+        standardRule2.setActionType("click");
+        standardRule2.setPattern(pattern2);
 
-        HashMap<Selector, String> patternTake = new HashMap<>();
-        patternTake.put(Selector.OUTER, "#content");
+        HashMap<Selector, String> pattern3 = new HashMap<>();
+        pattern3.put(Selector.OUTER, "#sres-navigator-top");
+        pattern3.put(Selector.PAGINATION_FROM, "#a-goto-1");
+        pattern3.put(Selector.PAGINATION_TO, "#a-goto-5");
+        pattern3.put(Selector.HREF, "href");
 
-        Map<String, String> param = new HashMap<>();
-        param.put("name", "div h1.page-header");
-        param.put("description", "div > p");
-        param.put("price", "div div div span.price span.price-value");
+        StandardRule standardRule3 = new StandardRule();
+        standardRule3.setSource("http://www.medknigaservis.ru/catalogue/med_spec/0001.html");
+        standardRule3.setActionType("pagination");
+        standardRule3.setPattern(pattern3);
 
-        Rule rule4 = new Rule();
-        rule4.setAction(take);
-        rule4.setPattern(patternTake);
-        rule4.setParam(param);
-        rule4.setSource(new ArrayList<>(Collections.singletonList("http://www.dealmed.ru/uzi_skaner_sonotouch10.html")));
+        HashMap<Selector, String> pattern4 = new HashMap<>();
+        pattern4.put(Selector.OUTER, "#content > div > div > div > div > div > div > div > table > tbody");
 
-        rules.addLast(rule1);
-        rules.addLast(rule2);
-        rules.addLast(rule3);
-        rules.addLast(rule4);
+        Map<String, Pair<String, String>> param = new HashMap<>();
+        param.put("name", Pair.of("tr > td.desc > div > a span", null));
+
+        StandardRule standardRule4 = new StandardRule();
+        standardRule4.setSource("http://www.medknigaservis.ru/catalogue/med_spec/0001/-esf2k2z11-year-dec-page-2.html");
+        standardRule4.setActionType("take");
+        standardRule4.setParam(param);
+        standardRule4.setPattern(pattern4);
+
+        rules.add(standardRule1);
+        rules.add(standardRule2);
+        rules.add(standardRule3);
+        rules.add(standardRule4);
 
         manager.process(rules);
     }

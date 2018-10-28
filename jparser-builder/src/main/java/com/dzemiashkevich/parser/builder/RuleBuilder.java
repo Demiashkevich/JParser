@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -41,36 +40,39 @@ public class RuleBuilder implements Builder<Rule, StandardRule> {
         Deque<Rule> rules = new ArrayDeque<>();
 
         if (CollectionUtils.isEmpty(standard)) {
-            return rules;
+            throw new RuntimeException("Unable to processed empty rule: " + standard);
         }
 
         for (StandardRule s : standard) {
+            Rule rule = prepareRule(s);
 
-            if (StringUtils.isEmpty(s.getSource()) || CollectionUtils.isEmpty(s.getPattern())) {
-                continue;
-            }
-
-            Rule rule = buildRule(s);
-
-            if (ObjectUtils.isEmpty(rule)) {
+            if (!ObjectUtils.isEmpty(rule)) {
                 rules.add(rule);
             }
-
         }
 
         return rules;
     }
 
-    private Rule buildRule(StandardRule standard) {
-        Document document = prepareDocument(standard.getSource());
-        Elements context = prepareContext(document, standard.getPattern());
-
-        Map<String, Pair<String, Integer>> params = prepareParams(context, standard.getParam());
+    private Rule prepareRule(StandardRule standard) {
         Action action = prepareActionType(standard.getActionType());
 
+        if (CollectionUtils.isEmpty(standard.getParam())) {
+            return buildRule(standard, Collections.emptyMap(), action);
+        }
+
+        Document document = prepareDocument(standard.getSource());
+        Elements context = prepareContext(document, standard.getPattern());
+        Map<String, Pair<String, Integer>> params = prepareParams(context, standard.getParam());
+
+        return buildRule(standard, params, action);
+    }
+
+    private Rule buildRule(StandardRule standard, Map<String, Pair<String, Integer>> params, Action action) {
         Rule rule = new Rule();
 
-        rule.setSource(Collections.singletonList(standard.getSource()));
+        rule.setName(standard.getName());
+        rule.setSource(new ArrayList<>(Collections.singletonList(standard.getSource())));
         rule.setPattern(standard.getPattern());
         rule.setParam(params);
         rule.setAction(action);
@@ -79,10 +81,19 @@ public class RuleBuilder implements Builder<Rule, StandardRule> {
     }
 
     private Document prepareDocument(String source) {
-        return documentStore.fetch(source);
+        Document document = documentStore.fetch(source);
+        if (document == null) {
+            throw new RuntimeException("Unable to load document by next source: " + source);
+        }
+
+        return document;
     }
 
     private Elements prepareContext(Document document, Map<Selector, String> pattern) {
+        if (!pattern.containsKey(Selector.OUTER)) {
+            return document.getAllElements();
+        }
+
         return document.select(pattern.get(Selector.OUTER));
     }
 
@@ -108,9 +119,14 @@ public class RuleBuilder implements Builder<Rule, StandardRule> {
         String selector = standard.getValue().getKey();
         String template = standard.getValue().getValue();
         String paramName = standard.getKey();
+
+        if (ObjectUtils.isEmpty(template)) {
+            return Map.entry(paramName, Pair.of(selector, null));
+        }
+
         Elements elements = context.select(selector);
 
-        for (int index = 0; index < context.size(); index++) {
+        for (int index = 0; index < elements.size(); index++) {
             Element element = elements.get(index);
 
             if (!ObjectUtils.isEmpty(element) && element.hasText()) {

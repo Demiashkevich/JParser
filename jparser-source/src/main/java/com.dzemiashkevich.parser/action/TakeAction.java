@@ -12,6 +12,7 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 
@@ -97,14 +98,25 @@ public class TakeAction implements Action {
                 continue;
             }
 
-            String content = elements.get(value.getValue()).text();
-
-            params.put(key, content);
+            Integer index = value.getValue();
+            Map<String, String> content = parseContent(elements, key, index);
+            params.putAll(content);
         }
 
         resource.setParams(params);
 
         return resource;
+    }
+
+    private Map<String, String> parseContent(Elements elements, String key, Integer index) {
+        if (ObjectUtils.isEmpty(index)) {
+            Map<String, String> param = new HashMap<>();
+            elements.forEach(e -> param.put(key, e.text()));
+            return param;
+        }
+
+        String text = elements.get(index).text();
+        return Collections.singletonMap(key, text);
     }
 
     private Elements getContextFromDocument(Document document, Map<Selector, String> pattern) {

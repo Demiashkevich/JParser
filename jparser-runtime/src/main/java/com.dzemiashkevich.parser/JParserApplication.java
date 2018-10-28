@@ -13,7 +13,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         TakeAction.class,
         PaginationAction.class,
         DStore.class,
-        RStore.class
+        RStore.class,
+        JParserController.class
 })
 public class JParserApplication {
 
