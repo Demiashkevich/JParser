@@ -1,34 +1,64 @@
 package com.dzemiashkevich.parser.action;
 
+import com.dzemiashkevich.jparser.StringUtils;
+import com.dzemiashkevich.parser.ApplicationException;
+import com.dzemiashkevich.parser.HStore;
 import com.dzemiashkevich.parser.api.Rule;
 import com.dzemiashkevich.parser.api.Selector;
+import com.dzemiashkevich.parser.finder.DiapasonFinder;
+import com.dzemiashkevich.parser.finder.api.Diapason;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class PaginationAction extends JumpAction {
 
+    private final DiapasonFinder finder;
+    private final HStore hrefStore;
+
+    @Autowired
+    public PaginationAction(DiapasonFinder finder, HStore hrefStore) {
+        this.finder = finder;
+        this.hrefStore = hrefStore;
+    }
+
     @Override
     protected List<String> parseContextBySelect(Document document, Map<Selector, String> select) {
-        Elements context = document.select(select.get(Selector.OUTER));
-        Pair<String, String> from = parseRange(context, select.get(Selector.PAGINATION_FROM), select.get(Selector.HREF));
-        Pair<String, String> to = parseRange(context, select.get(Selector.PAGINATION_TO), select.get(Selector.HREF));
+        Diapason diapason = finder.doAction(select, document);
 
-        if (ObjectUtils.isEmpty(to)) {
-            to = parseRange(context, select.get(Selector.HREF));
-        }
-
-        if (ObjectUtils.isEmpty(from) && ObjectUtils.isEmpty(to)) {
+        if (ObjectUtils.isEmpty(diapason.getFrom()) && ObjectUtils.isEmpty(diapason.getTo())) {
             return new ArrayList<>(Collections.singletonList(document.location()));
         }
 
-        return generateHref(from, to);
+
+
+        return generateHref(diapason.getFrom(), diapason.getTo());
+    }
+
+    private List<String> process(Diapason diapason) {
+        List<String> processedHref = generateHref(diapason.getFrom(), diapason.getTo());
+
+        if (!hrefStore.isEmpty()) {
+            List<Pair<String, String>> unprocessedPage = hrefStore.fetch();
+            for (Pair<String, String> page : unprocessedPage) {
+                try {
+                    String template = StringUtils.template(page);
+                    processedHref.add(template);
+                } catch (ApplicationException e) {
+
+                }
+            }
+        }
+
+        return processedHref;
     }
 
     @Override
@@ -37,29 +67,20 @@ public class PaginationAction extends JumpAction {
         next.setSource(removeRepeatable(next.getSource()));
     }
 
-    private Pair<String, String> parseRange(Elements context, String hrefSelector) {
-        Element to = context.last();
-        return Pair.of(to.attr(hrefSelector), to.text());
-    }
-
-    private Pair<String, String> parseRange(Elements context, String paginationSelector, String hrefSelector) {
-        Elements range = context.select(paginationSelector);
-        if (range.isEmpty()) {
-            return null;
-        }
-        return Pair.of(range.attr(hrefSelector), range.text());
-    }
-
     private List<String> generateHref(Pair<String, String> from, Pair<String, String> to) {
         String template;
-
-        if (from.getLeft().equals(to.getLeft())) {
-            template = com.dzemiashkevich.jparser.StringUtils.template(from);
-        } else {
-            template = com.dzemiashkevich.jparser.StringUtils.template(from, to);
+        try {
+            if (from.getLeft().equals(to.getLeft())) {
+                template = com.dzemiashkevich.jparser.StringUtils.template(from);
+                return generateHrefByTemplate(template, from.getRight(), from.getRight());
+            } else {
+                template = com.dzemiashkevich.jparser.StringUtils.template(from, to);
+                return generateHrefByTemplate(template, from.getRight(), to.getRight());
+            }
+        } catch (ApplicationException exception) {
+            hrefStore.save(from);
+            return Collections.emptyList();
         }
-
-        return generateHrefByTemplate(template, from.getRight(), to.getRight());
     }
 
     private List<String> generateHrefByTemplate(String template, String from, String to) {

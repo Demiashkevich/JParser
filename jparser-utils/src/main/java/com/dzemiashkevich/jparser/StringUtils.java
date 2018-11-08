@@ -1,5 +1,7 @@
 package com.dzemiashkevich.jparser;
 
+import com.dzemiashkevich.parser.ApplicationException;
+import com.dzemiashkevich.parser.TypeException;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.regex.Matcher;
@@ -26,37 +28,46 @@ public final class StringUtils {
         Pattern pattern = Pattern.compile("[0-9]+");
         Matcher matcher = pattern.matcher(str2);
 
+        int count = 0;
+
         while (matcher.find()) {
             int indexOfStart = matcher.start();
             int indexOfEnd = matcher.end();
 
             if (indexOfStart <= indexOfDifference && indexOfEnd >= indexOfDifference) {
-                MatcherUtils.save(matcher.groupCount());
+                MatcherUtils.save(count);
                 return str2.substring(0, indexOfStart) + "%s" + str2.substring(indexOfEnd);
             }
+
+            count++;
         }
 
         throw new RuntimeException(String.format("Unable to generate template by urls: %s, %s", str1, str2));
     }
 
-    public static String template(Pair<String, String> pair1) {
+    public static String template(Pair<String, String> pair1) throws ApplicationException {
         String str1 = pair1.getLeft();
 
-        Integer groupId = MatcherUtils.fetch();
+        Integer count;
+        try {
+            count = MatcherUtils.fetch();
+        } catch (ApplicationException exception) {
+            throw new ApplicationException(TypeException.TEMPLATE_GENERATION, str1);
+        }
 
         Pattern pattern = Pattern.compile("[0-9]+");
         Matcher matcher = pattern.matcher(pair1.getLeft());
 
-        String group = matcher.group(groupId);
+        while (matcher.find()) {
+            if (count-- == 0) {
+                int indexOfStart = matcher.start();
+                int indexOfEnd = matcher.end();
 
-        if (org.apache.commons.lang3.StringUtils.equals(group, pair1.getRight())) {
-            int indexOfStart = matcher.start(groupId);
-            int indexOfEnd = matcher.end(groupId);
-
-            return str1.substring(0, indexOfStart) + "%s" + str1.substring(indexOfEnd);
+                return str1.substring(0, indexOfStart) + "%s" + str1.substring(indexOfEnd);
+            }
         }
 
-        throw new RuntimeException(String.format("Unable to generate template by url: %s", str1));
+        throw new ApplicationException(TypeException.MATCHER_FINDER, str1);
     }
 
 }

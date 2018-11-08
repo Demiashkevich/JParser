@@ -19,11 +19,15 @@
         </dependency>
         <dependency>
             <groupId>com.dzemiashkevich.parser</groupId>
-            <artifactId>jparser-common</artifactId>
+            <artifactId>jparser-storage</artifactId>
         </dependency>
         <dependency>
             <groupId>com.dzemiashkevich.parser</groupId>
             <artifactId>jparser-utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dzemiashkevich.parser</groupId>
+            <artifactId>jparser-exception</artifactId>
         </dependency>
     </dependencies>
 

@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>com.dzemiashkevich.parser</groupId>
-            <artifactId>jparser-common</artifactId>
+            <artifactId>jparser-storage</artifactId>
         </dependency>
 
         <dependency>

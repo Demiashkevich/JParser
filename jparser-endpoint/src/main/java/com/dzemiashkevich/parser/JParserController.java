@@ -1,6 +1,5 @@
 package com.dzemiashkevich.parser;
 
-import com.dzemiashkevich.parser.api.Rule;
 import com.dzemiashkevich.parser.api.Selector;
 import com.dzemiashkevich.parser.api.StandardRule;
 import org.apache.commons.lang3.tuple.Pair;
@@ -8,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class JParserController {
@@ -22,7 +24,7 @@ public class JParserController {
 
     @PostConstruct
     public void init() {
-        List<StandardRule> rules = new ArrayList<>();
+        List<StandardRule> rules1 = new ArrayList<>();
 
         HashMap<Selector, String> pattern1 = new HashMap<>();
         pattern1.put(Selector.OUTER, "#le_menu_ul > ul > li > a");
@@ -46,6 +48,7 @@ public class JParserController {
         pattern3.put(Selector.OUTER, "#sres-navigator-top");
         pattern3.put(Selector.PAGINATION_FROM, "#a-goto-1");
         pattern3.put(Selector.PAGINATION_TO, "#a-goto-5");
+        pattern3.put(Selector.PAGINATION_CONTEXT, "div > div > a");
         pattern3.put(Selector.HREF, "href");
 
         StandardRule standardRule3 = new StandardRule();
@@ -64,13 +67,45 @@ public class JParserController {
         standardRule4.setActionType("take");
         standardRule4.setParam(param);
         standardRule4.setPattern(pattern4);
+        standardRule4.setName("First file");
 
-        rules.add(standardRule1);
-        rules.add(standardRule2);
-        rules.add(standardRule3);
-        rules.add(standardRule4);
+        rules1.add(standardRule1);
+        rules1.add(standardRule2);
+        rules1.add(standardRule3);
+        rules1.add(standardRule4);
 
-        manager.process(rules);
+        manager.process(rules1);
+
+        List<StandardRule> rules2 = new ArrayList<>();
+
+        HashMap<Selector, String> pattern2_1 = new HashMap<>();
+        pattern2_1.put(Selector.OUTER, "#le_menu_ul-14 > ul > li > a");
+        pattern2_1.put(Selector.HREF, "href");
+
+        StandardRule standardRule2_1 = new StandardRule();
+        standardRule2_1.setSource("http://www.medknigaservis.ru");
+        standardRule2_1.setActionType("click");
+        standardRule2_1.setPattern(pattern2_1);
+
+        HashMap<Selector, String> pattern2_4 = new HashMap<>();
+        pattern2_4.put(Selector.OUTER, "#content > div > div > div > div > div > div > div > table > tbody");
+
+        Map<String, Pair<String, String>> param2 = new HashMap<>();
+        param2.put("name", Pair.of("tr > td.desc > div > a span", null));
+
+        StandardRule standardRule2_4 = new StandardRule();
+        standardRule2_4.setSource("http://www.medknigaservis.ru/catalogue/med_spec/0001/-esf2k2z11-year-dec-page-2.html");
+        standardRule2_4.setActionType("take");
+        standardRule2_4.setParam(param2);
+        standardRule2_4.setPattern(pattern2_4);
+        standardRule2_4.setName("Second file");
+
+        rules2.add(standardRule2_1);
+        rules2.add(standardRule2);
+        rules2.add(standardRule3);
+        rules2.add(standardRule2_4);
+
+        manager.process(rules2);
     }
 
 }
